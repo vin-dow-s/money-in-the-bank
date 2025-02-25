@@ -23,6 +23,7 @@ Before responding to any request, follow these steps:
 3. Implementation Strategy
 
     - Choose appropriate design patterns
+    - Always use arrow functions
     - Consider performance implications
     - Plan for error handling and edge cases
     - Ensure accessibility compliance
