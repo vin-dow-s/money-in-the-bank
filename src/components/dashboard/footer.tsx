@@ -1,10 +1,4 @@
-"use client"
-
-interface FooterProps {
-    className?: string
-}
-
-export function Footer({ className }: FooterProps) {
+export const Footer = () => {
     return (
         <footer className="border-t py-4 px-4 md:px-6">
             <div className="container mx-auto text-center text-sm text-muted-foreground">

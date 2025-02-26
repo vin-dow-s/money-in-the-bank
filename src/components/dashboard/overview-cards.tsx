@@ -30,22 +30,27 @@ interface StatCardProps {
     className?: string
 }
 
-function StatCard({
+const StatCard = ({
     title,
     value,
     description,
     icon,
     trend,
     className,
-}: StatCardProps) {
+}: StatCardProps) => {
     return (
         <Card className={cn("overflow-hidden", className)}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                <CardTitle className="text-sm  text-muted-foreground font-medium">
+                    {title}
+                </CardTitle>
                 <div className="h-4 w-4 text-muted-foreground">{icon}</div>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
+                <div className="text-4xl font-regular">
+                    {value}
+                    <span className="text-sm">€</span>
+                </div>
                 <p className="text-xs text-muted-foreground">{description}</p>
             </CardContent>
             {trend && (
@@ -69,33 +74,33 @@ function StatCard({
     )
 }
 
-export function OverviewCards() {
+export const OverviewCards = () => {
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard
                 title="Total Balance"
-                value="$12,345.67"
+                value="12 345"
                 description="Your total assets across all accounts"
                 icon={<DollarSign className="h-4 w-4" />}
                 trend={{ value: "+2.5% from last month", isPositive: true }}
             />
             <StatCard
                 title="Monthly Budget"
-                value="$3,500.00"
+                value="2300"
                 description="Budget for May 2024"
                 icon={<Wallet className="h-4 w-4" />}
                 trend={{ value: "$500 remaining", isPositive: true }}
             />
             <StatCard
                 title="Investments"
-                value="$5,678.90"
+                value="5678"
                 description="Current portfolio value"
                 icon={<LineChart className="h-4 w-4" />}
                 trend={{ value: "+5.2% all time", isPositive: true }}
             />
             <StatCard
                 title="Monthly Expenses"
-                value="$2,345.67"
+                value="1145"
                 description="Total spent this month"
                 icon={<CreditCard className="h-4 w-4" />}
                 trend={{ value: "-3.1% from last month", isPositive: true }}

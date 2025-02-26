@@ -19,7 +19,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export default function SettingsPage() {
+const SettingsPage = () => {
     return (
         <div className="flex flex-col gap-4">
             <div>
@@ -297,7 +297,7 @@ export default function SettingsPage() {
                                         Budget Alerts
                                     </Label>
                                     <p className="text-sm text-muted-foreground">
-                                        Get notified when you're close to
+                                        Get notified when you&apos;re close to
                                         exceeding your budget
                                     </p>
                                 </div>
@@ -325,3 +325,5 @@ export default function SettingsPage() {
         </div>
     )
 }
+
+export default SettingsPage

@@ -9,14 +9,14 @@ interface MainNavProps {
     className?: string
 }
 
-export function MainNav({ className }: MainNavProps) {
+export const MainNav = ({ className }: MainNavProps) => {
     const pathname = usePathname()
 
     const routes = [
         {
             href: "/",
             label: "Dashboard",
-            active: pathname === "/dashboard",
+            active: pathname === "/",
         },
         {
             href: "/budget",
@@ -24,14 +24,19 @@ export function MainNav({ className }: MainNavProps) {
             active: pathname === "/budget",
         },
         {
+            href: "/wallet",
+            label: "Wallet",
+            active: pathname === "/wallet",
+        },
+        {
             href: "/investments",
             label: "Investments",
             active: pathname === "/investments",
         },
         {
-            href: "/settings",
-            label: "Settings",
-            active: pathname === "/settings",
+            href: "/simulations",
+            label: "Simulations",
+            active: pathname === "/simulations",
         },
     ]
 

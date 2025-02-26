@@ -98,7 +98,7 @@ const holdingsData = [
     },
 ]
 
-export default function InvestmentsPage() {
+const InvestmentsPage = () => {
     const totalPortfolioValue = portfolioData.reduce(
         (sum, item) => sum + item.value,
         0
@@ -287,7 +287,7 @@ export default function InvestmentsPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-md border">
+                    <div className="rounded-sm border">
                         <div className="grid grid-cols-12 border-b bg-muted/50 p-3 text-sm font-medium">
                             <div className="col-span-1">#</div>
                             <div className="col-span-2">Symbol</div>
@@ -332,9 +332,9 @@ export default function InvestmentsPage() {
                                             <span className="mr-2">
                                                 {holding.allocation.toFixed(1)}%
                                             </span>
-                                            <div className="h-2 w-16 rounded-full bg-muted">
+                                            <div className="h-2 w-16 rounded-sm bg-muted">
                                                 <div
-                                                    className="h-2 rounded-full bg-primary"
+                                                    className="h-2 rounded-sm bg-primary"
                                                     style={{
                                                         width: `${holding.allocation}%`,
                                                     }}
@@ -351,3 +351,5 @@ export default function InvestmentsPage() {
         </div>
     )
 }
+
+export default InvestmentsPage

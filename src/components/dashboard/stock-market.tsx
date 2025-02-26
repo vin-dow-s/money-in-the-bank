@@ -60,7 +60,7 @@ const stockData = [
     },
 ]
 
-export function StockMarket() {
+export const StockMarket = () => {
     const [searchTerm, setSearchTerm] = useState("")
 
     const filteredStocks = stockData.filter(
@@ -91,7 +91,7 @@ export function StockMarket() {
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="rounded-md border">
+                <div className="rounded-sm border">
                     <div className="grid grid-cols-12 border-b bg-muted/50 p-3 text-sm font-medium">
                         <div className="col-span-3">Symbol</div>
                         <div className="col-span-5">Name</div>

@@ -41,7 +41,7 @@ const weeklyData = [
     { name: "Sun", expenses: 150, income: 200 },
 ]
 
-export function ExpenseChart() {
+export const ExpenseChart = () => {
     const [activeTab, setActiveTab] = useState("monthly")
     const data = activeTab === "monthly" ? monthlyData : weeklyData
 

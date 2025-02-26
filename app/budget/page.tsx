@@ -18,7 +18,7 @@ const budgetCategories = [
     { name: "Savings", allocated: 500, spent: 500, remaining: 0 },
 ]
 
-export default function BudgetPage() {
+const BudgetPage = () => {
     const totalAllocated = budgetCategories.reduce(
         (sum, category) => sum + category.allocated,
         0
@@ -46,8 +46,9 @@ export default function BudgetPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">
-                            ${totalAllocated.toFixed(2)}
+                        <div className="text-4xl font-regular">
+                            {totalAllocated}
+                            <span className="text-sm">€</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -58,8 +59,9 @@ export default function BudgetPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">
-                            ${totalSpent.toFixed(2)}
+                        <div className="text-4xl font-regular">
+                            {totalSpent}
+                            <span className="text-sm">€</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -71,13 +73,14 @@ export default function BudgetPage() {
                     </CardHeader>
                     <CardContent>
                         <div
-                            className={`text-2xl font-bold ${
+                            className={`text-4xl font-regular ${
                                 totalRemaining >= 0
                                     ? "text-green-500"
                                     : "text-red-500"
                             }`}
                         >
-                            ${totalRemaining.toFixed(2)}
+                            {totalRemaining}
+                            <span className="text-sm">€</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -91,7 +94,7 @@ export default function BudgetPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-md border">
+                    <div className="rounded-sm border">
                         <div className="grid grid-cols-12 border-b bg-muted/50 p-3 text-sm font-medium">
                             <div className="col-span-4">Category</div>
                             <div className="col-span-2 text-right">
@@ -115,10 +118,12 @@ export default function BudgetPage() {
                                         {category.name}
                                     </div>
                                     <div className="col-span-2 text-right">
-                                        ${category.allocated.toFixed(2)}
+                                        {category.allocated}
+                                        <span className="text-sm">€</span>
                                     </div>
                                     <div className="col-span-2 text-right">
-                                        ${category.spent.toFixed(2)}
+                                        {category.spent}
+                                        <span className="text-sm">€</span>
                                     </div>
                                     <div
                                         className={`col-span-2 text-right ${
@@ -127,12 +132,13 @@ export default function BudgetPage() {
                                                 : "text-red-500"
                                         }`}
                                     >
-                                        ${category.remaining.toFixed(2)}
+                                        {category.remaining}
+                                        <span className="text-sm">€</span>
                                     </div>
                                     <div className="col-span-2">
-                                        <div className="h-2 w-full rounded-full bg-muted">
+                                        <div className="h-2 w-full rounded-sm bg-muted">
                                             <div
-                                                className={`h-2 rounded-full ${
+                                                className={`h-2 rounded-sm ${
                                                     category.spent /
                                                         category.allocated >
                                                     1
@@ -163,3 +169,5 @@ export default function BudgetPage() {
         </div>
     )
 }
+
+export default BudgetPage

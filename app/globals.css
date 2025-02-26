@@ -11,6 +11,9 @@
 @theme {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
+    --font-grotesque: var(--font-grotesque);
+    --font-sans: var(--font-grotesque), system-ui, sans-serif;
+    --color-cta: #63ff2b;
 }
 
 /*
@@ -65,6 +68,7 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
+    --cta: #63ff2b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -77,7 +81,7 @@
 body {
     color: var(--foreground);
     background: var(--background);
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font-sans);
 }
 
 /*
@@ -117,6 +121,7 @@ body {
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
+    --cta: #63ff2b;
 }
 
 /*
@@ -160,6 +165,8 @@ body {
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+    --font-sans: var(--font-grotesque), system-ui, sans-serif;
+    --color-cta: var(--cta);
 }
 
 /*
@@ -171,6 +178,10 @@ body {
         @apply border-border outline-ring/50;
     }
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-sans;
     }
+}
+
+.btn-cta {
+    @apply bg-[#63FF2B] text-black font-medium hover:bg-[#63FF2B]/90 transition-colors;
 }

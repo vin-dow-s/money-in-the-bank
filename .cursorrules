@@ -35,6 +35,7 @@ Before responding to any request, follow these steps:
 
 -   Always use pnpm instead of npm for dependencies
 -   Write concise, readable TypeScript code
+-   Use native FETCH API instead of axios
 -   Use functional and declarative programming patterns
 -   For fetching data, always go for a solution that handles caching to improve performances
 -   Follow DRY (Don't Repeat Yourself) principle
