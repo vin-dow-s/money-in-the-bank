@@ -67,7 +67,6 @@ export const getStockQuote = async (symbol: string): Promise<StockQuote> => {
         }
 
         const data = await response.json()
-        console.log("🚀 ~ getStockQuote ~ data:", data)
 
         if (data["Error Message"]) {
             throw new Error(data["Error Message"])
@@ -108,7 +107,6 @@ export const getStockQuote = async (symbol: string): Promise<StockQuote> => {
 export const searchSymbols = async (
     query: string
 ): Promise<{ symbol: string; name: string; type: string }[]> => {
-    console.log("🚀 ~ query:", query)
     try {
         const response = await fetch(
             `${BASE_URL}?function=SYMBOL_SEARCH&keywords=${query}&apikey=${ALPHA_VANTAGE_API_KEY}`
@@ -119,7 +117,6 @@ export const searchSymbols = async (
         }
 
         const data = await response.json()
-        console.log("🚀 ~ data:", data)
 
         if (data["Error Message"]) {
             throw new Error(data["Error Message"])
@@ -136,8 +133,6 @@ export const searchSymbols = async (
                 type: match["3. type"], // This should show 'ETF' for ETFs
             })
         )
-
-        console.log("✅ Processed Results:", formattedResults) // LOG FILTERED RESULTS
 
         return formattedResults
     } catch (error) {

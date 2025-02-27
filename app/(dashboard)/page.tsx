@@ -4,8 +4,8 @@ import { StockMarket } from "@/components/dashboard/stock-market"
 
 const DashboardPage = () => {
     return (
-        <div className="flex flex-col gap-4">
-            <div>
+        <div className="flex flex-col gap-4 py-6">
+            <div className="mb-3">
                 <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
             </div>
             <OverviewCards />

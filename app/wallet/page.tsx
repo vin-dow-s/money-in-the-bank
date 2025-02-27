@@ -1,3 +1,4 @@
+import { OverviewCards } from "@/components/wallet/overview-cards"
 import { Wallet } from "@/components/wallet/wallet"
 import { Metadata } from "next"
 
@@ -6,19 +7,20 @@ export const metadata: Metadata = {
     description: "Manage your stock and ETF portfolio",
 }
 
-export default function WalletPage() {
+const WalletPage = () => {
     return (
-        <main className="container py-6">
-            <div className="mb-6">
+        <div className="flex flex-col gap-4 py-6">
+            <div className="mb-3">
                 <h1 className="text-3xl font-bold">Portfolio</h1>
-                <p className="text-muted-foreground">
-                    Track your investments and monitor their performance
-                </p>
             </div>
+
+            <OverviewCards />
 
             <div className="grid gap-6">
                 <Wallet />
             </div>
-        </main>
+        </div>
     )
 }
+
+export default WalletPage

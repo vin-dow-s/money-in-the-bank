@@ -1,4 +1,4 @@
-import { getStockQuote } from "@/lib/api/alphavantage"
+import { getStockQuoteYahoo } from "@/lib/api/yahoofinance"
 import { create } from "zustand"
 import { persist, PersistOptions } from "zustand/middleware"
 
@@ -85,21 +85,34 @@ export const useWalletStore = create<WalletState>()(
             totalGainPercent: 0,
 
             setIsLoading: (isLoading: boolean) => set({ isLoading }),
-
             setError: (error: string | null) => set({ error }),
 
             addHolding: async (newHolding) => {
                 set({ isLoading: true, error: null })
 
                 try {
-                    const quote = await getStockQuote(newHolding.symbol)
+                    /* // Try Finnhub first
+                    let finnhubQuote = await getStockQuoteFinnhub(
+                        newHolding.symbol
+                    )
+ */
+                    const quote = await getStockQuoteYahoo(newHolding.symbol)
+
+                    if (!quote) {
+                        throw new Error(
+                            "Failed to fetch stock data from all available APIs"
+                        )
+                    }
+
                     const currentPrice = quote.price
                     const currentValue = currentPrice * newHolding.shares
+
                     const gain =
                         currentValue -
                         newHolding.purchasePrice * newHolding.shares
+
                     const gainPercent =
-                        ((currentPrice - newHolding.purchasePrice) /
+                        ((currentValue - newHolding.purchasePrice) /
                             newHolding.purchasePrice) *
                         100
 
@@ -110,7 +123,7 @@ export const useWalletStore = create<WalletState>()(
                         currentValue,
                         gain,
                         gainPercent,
-                        lastUpdated: quote.lastUpdated,
+                        lastUpdated: quote.lastUpdated || "",
                     }
 
                     const holdings = [...get().holdings, holding]
@@ -213,9 +226,17 @@ export const useWalletStore = create<WalletState>()(
                     const updatedHoldings = await Promise.all(
                         holdings.map(async (holding) => {
                             try {
-                                const quote = await getStockQuote(
+                                /* // Try Finnhub first
+                                let finnhubQuote = await getStockQuoteFinnhub(
+                                    holding.symbol
+                                )*/
+
+                                const quote = await getStockQuoteYahoo(
                                     holding.symbol
                                 )
+
+                                if (!quote) return holding
+
                                 const currentPrice = quote.price
                                 const currentValue =
                                     currentPrice * holding.shares
@@ -223,7 +244,7 @@ export const useWalletStore = create<WalletState>()(
                                     currentValue -
                                     holding.purchasePrice * holding.shares
                                 const gainPercent =
-                                    ((currentPrice - holding.purchasePrice) /
+                                    ((currentValue - holding.purchasePrice) /
                                         holding.purchasePrice) *
                                     100
 

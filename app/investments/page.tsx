@@ -1,18 +1,6 @@
 import { Plus } from "lucide-react"
-import {
-    CartesianGrid,
-    Cell,
-    Legend,
-    Line,
-    LineChart,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from "recharts"
 
+import { OverviewCards } from "@/components/investments/overview-cards"
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -99,11 +87,6 @@ const holdingsData = [
 ]
 
 const InvestmentsPage = () => {
-    const totalPortfolioValue = portfolioData.reduce(
-        (sum, item) => sum + item.value,
-        0
-    )
-
     return (
         <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
@@ -121,53 +104,7 @@ const InvestmentsPage = () => {
                 </Button>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Total Portfolio Value
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            ${totalPortfolioValue.toLocaleString()}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            Updated just now
-                        </p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Monthly Return
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-500">
-                            +$500.00 (7.7%)
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            Last 30 days
-                        </p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            YTD Return
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-500">
-                            +$2,000.00 (40.0%)
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            Since Jan 1, 2024
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
+            <OverviewCards />
 
             <div className="grid gap-4 md:grid-cols-2">
                 <Card className="col-span-1">
@@ -178,40 +115,7 @@ const InvestmentsPage = () => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={portfolioData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                        label={({ name, percent }) =>
-                                            `${name} ${(percent * 100).toFixed(
-                                                0
-                                            )}%`
-                                        }
-                                    >
-                                        {portfolioData.map((entry, index) => (
-                                            <Cell
-                                                key={`cell-${index}`}
-                                                fill={entry.color}
-                                            />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        formatter={(value) => [
-                                            `$${value}`,
-                                            "Value",
-                                        ]}
-                                    />
-                                    <Legend />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
+                        <div className="h-[300px]"></div>
                     </CardContent>
                 </Card>
 
@@ -223,131 +127,10 @@ const InvestmentsPage = () => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart
-                                    data={performanceData}
-                                    margin={{
-                                        top: 5,
-                                        right: 30,
-                                        left: 20,
-                                        bottom: 5,
-                                    }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis
-                                        dataKey="date"
-                                        tickFormatter={(tick) => {
-                                            const date = new Date(tick)
-                                            return `${date.toLocaleString(
-                                                "default",
-                                                { month: "short" }
-                                            )}`
-                                        }}
-                                    />
-                                    <YAxis
-                                        tickFormatter={(tick) => `$${tick}`}
-                                    />
-                                    <Tooltip
-                                        formatter={(value) => [
-                                            `$${value}`,
-                                            "Portfolio Value",
-                                        ]}
-                                        labelFormatter={(label) => {
-                                            const date = new Date(label)
-                                            return `${date.toLocaleString(
-                                                "default",
-                                                {
-                                                    month: "long",
-                                                    year: "numeric",
-                                                }
-                                            )}`
-                                        }}
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="value"
-                                        stroke="#10b981"
-                                        strokeWidth={2}
-                                        dot={{ r: 4 }}
-                                        activeDot={{ r: 6 }}
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
+                        <div className="h-[300px]"></div>
                     </CardContent>
                 </Card>
             </div>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Holdings</CardTitle>
-                    <CardDescription>
-                        Your current investment holdings
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="rounded-sm border">
-                        <div className="grid grid-cols-12 border-b bg-muted/50 p-3 text-sm font-medium">
-                            <div className="col-span-1">#</div>
-                            <div className="col-span-2">Symbol</div>
-                            <div className="col-span-3">Name</div>
-                            <div className="col-span-1 text-right">Shares</div>
-                            <div className="col-span-1 text-right">Price</div>
-                            <div className="col-span-2 text-right">Value</div>
-                            <div className="col-span-2 text-right">
-                                Allocation
-                            </div>
-                        </div>
-                        <div className="divide-y">
-                            {holdingsData.map((holding, index) => (
-                                <div
-                                    key={holding.symbol}
-                                    className="grid grid-cols-12 items-center p-3 text-sm"
-                                >
-                                    <div className="col-span-1 text-muted-foreground">
-                                        {index + 1}
-                                    </div>
-                                    <div className="col-span-2 font-medium">
-                                        {holding.symbol}
-                                    </div>
-                                    <div className="col-span-3 text-muted-foreground">
-                                        {holding.name}
-                                    </div>
-                                    <div className="col-span-1 text-right">
-                                        {holding.shares !== null
-                                            ? holding.shares
-                                            : "-"}
-                                    </div>
-                                    <div className="col-span-1 text-right">
-                                        {holding.price !== null
-                                            ? `$${holding.price.toFixed(2)}`
-                                            : "-"}
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        ${holding.value.toFixed(2)}
-                                    </div>
-                                    <div className="col-span-2 text-right">
-                                        <div className="flex items-center justify-end">
-                                            <span className="mr-2">
-                                                {holding.allocation.toFixed(1)}%
-                                            </span>
-                                            <div className="h-2 w-16 rounded-sm bg-muted">
-                                                <div
-                                                    className="h-2 rounded-sm bg-primary"
-                                                    style={{
-                                                        width: `${holding.allocation}%`,
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
         </div>
     )
 }

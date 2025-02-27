@@ -3,7 +3,7 @@
 import { Settings } from "lucide-react"
 import Link from "next/link"
 
-import { MainNav } from "@/components/dashboard/main-nav"
+import { MainNav } from "@/components/main-nav"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Image from "next/image"

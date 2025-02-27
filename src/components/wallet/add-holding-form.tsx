@@ -23,14 +23,12 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { searchSymbols } from "@/lib/api/alphavantage"
+import { searchSymbolsYahoo } from "@/lib/api/yahoofinance"
 import { useWalletStore } from "@/lib/store/wallet-store"
-import { cn } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import { ChevronsUpDown, Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -52,8 +50,6 @@ interface SearchResult {
     type: string
 }
 
-type SearchType = "symbol" | "name"
-
 export const AddHoldingForm = ({
     onCancel,
     onSuccess,
@@ -68,17 +64,17 @@ export const AddHoldingForm = ({
     const [selectedStock, setSelectedStock] = useState<SearchResult | null>(
         null
     )
-    const [open, setOpen] = useState(false)
+    const [openSearch, setOpenSearch] = useState(false)
     const [formSubmitting, setFormSubmitting] = useState(false)
-    const [searchType, setSearchType] = useState<SearchType>("symbol")
+    const searchCacheRef = useRef<{ [key: string]: SearchResult[] }>({})
 
     const form = useForm<AddHoldingFormValues>({
         resolver: zodResolver(addHoldingSchema),
         defaultValues: {
             symbol: "",
             name: "",
-            shares: undefined,
-            purchasePrice: undefined,
+            shares: 0,
+            purchasePrice: 0,
             purchaseDate: format(new Date(), "yyyy-MM-dd"),
         },
     })
@@ -91,27 +87,21 @@ export const AddHoldingForm = ({
                 return
             }
 
+            // Check if we have cached results for this query
+            const cacheKey = searchQuery
+
+            if (searchCacheRef.current[cacheKey]) {
+                setSearchResults(searchCacheRef.current[cacheKey])
+                return
+            }
+
             setIsSearching(true)
             try {
-                const results = await searchSymbols(searchQuery)
+                const results = await searchSymbolsYahoo(searchQuery)
 
-                // Filter results based on search type
-                const filteredResults =
-                    searchType === "symbol"
-                        ? results.filter((stock) =>
-                              stock.symbol
-                                  .toLowerCase()
-                                  .includes(searchQuery.toLowerCase())
-                          )
-                        : results.filter((stock) =>
-                              stock.name
-                                  .toLowerCase()
-                                  .includes(searchQuery.toLowerCase())
-                          )
-
-                setSearchResults(
-                    filteredResults.length > 0 ? filteredResults : results
-                )
+                // Cache the results
+                searchCacheRef.current[cacheKey] = results
+                setSearchResults(results)
             } catch (error) {
                 console.error("Error searching for symbols:", error)
                 setSearchResults([])
@@ -121,7 +111,13 @@ export const AddHoldingForm = ({
         }, 500)
 
         return () => clearTimeout(delayDebounceFn)
-    }, [searchQuery, searchType])
+    }, [searchQuery])
+
+    const updateFormWithStock = (stock: SearchResult) => {
+        setSelectedStock(stock)
+        form.setValue("symbol", stock.symbol)
+        form.setValue("name", stock.name)
+    }
 
     const onSubmit = async (data: AddHoldingFormValues) => {
         setFormSubmitting(true)
@@ -137,87 +133,89 @@ export const AddHoldingForm = ({
     }
 
     const handleSelectStock = (stock: SearchResult) => {
-        setSelectedStock(stock)
-        form.setValue("symbol", stock.symbol)
-        form.setValue("name", stock.name)
-        setOpen(false)
+        updateFormWithStock(stock)
+        setOpenSearch(false)
     }
 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-6 gap-3">
+                    {/* Search Field */}
                     <FormField
                         control={form.control}
                         name="symbol"
                         render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Stock Symbol</FormLabel>
-                                <Popover open={open} onOpenChange={setOpen}>
+                            <FormItem className="col-span-3">
+                                <FormLabel>Stock/ETF Name</FormLabel>
+                                <Popover
+                                    open={openSearch}
+                                    onOpenChange={setOpenSearch}
+                                >
                                     <PopoverTrigger asChild>
                                         <FormControl>
                                             <Button
                                                 variant="outline"
-                                                role="combobox"
-                                                aria-expanded={open}
-                                                className={cn(
-                                                    "w-full justify-between",
-                                                    !field.value &&
-                                                        "text-muted-foreground"
-                                                )}
-                                                disabled={
-                                                    formSubmitting || isLoading
-                                                }
+                                                className="h-10 w-full justify-between"
                                             >
-                                                {field.value
-                                                    ? selectedStock?.symbol ||
-                                                      field.value
-                                                    : "Search..."}
+                                                {selectedStock ? (
+                                                    <span>
+                                                        {selectedStock.name} (
+                                                        {selectedStock.symbol})
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-muted-foreground">
+                                                        Search by name, stock
+                                                        symbol, ISIN code...
+                                                    </span>
+                                                )}
                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0" />
                                             </Button>
                                         </FormControl>
                                     </PopoverTrigger>
-                                    <PopoverContent className="p-0 w-[400px] max-h-[350px] overflow-y-auto">
-                                        <Command className=" [&_[cmdk-item]]:!pointer-events-auto [&_[cmdk-item]]:!opacity-100">
-                                            <div className="flex items-center border-b">
-                                                <CommandInput
-                                                    placeholder={`Search by...`}
-                                                    value={searchQuery}
-                                                    onValueChange={
-                                                        setSearchQuery
-                                                    }
-                                                    className="h-9 flex-1"
-                                                />
-                                            </div>
+                                    <PopoverContent className="p-0 w-[600px] max-h-[350px] overflow-y-auto">
+                                        <Command shouldFilter={false}>
+                                            <CommandInput
+                                                placeholder="Ex: S&P 500, WPEA, FR0011550185..."
+                                                value={searchQuery}
+                                                onValueChange={setSearchQuery}
+                                                className="h-9"
+                                            />
 
-                                            <Tabs
-                                                defaultValue="symbol"
-                                                value={searchType}
-                                                onValueChange={(value) =>
-                                                    setSearchType(
-                                                        value as SearchType
-                                                    )
-                                                }
-                                                className="w-full"
-                                            >
-                                                <div className="border-b px-1 py-1">
-                                                    <TabsList className="w-full grid grid-cols-2">
-                                                        <TabsTrigger value="symbol">
-                                                            Stock Symbol
-                                                        </TabsTrigger>
-                                                        <TabsTrigger value="name">
-                                                            ETF Name
-                                                        </TabsTrigger>
-                                                    </TabsList>
-                                                </div>
-
-                                                <CommandList>
-                                                    {isSearching && (
-                                                        <div className="flex items-center justify-center py-6">
-                                                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                                                        </div>
+                                            <CommandList>
+                                                <CommandGroup heading="Results">
+                                                    {searchResults.map(
+                                                        (stock) => (
+                                                            <CommandItem
+                                                                key={`${stock.symbol}-${stock.name}`}
+                                                                value={`${stock.symbol}-${stock.name}`}
+                                                                onSelect={() =>
+                                                                    handleSelectStock(
+                                                                        stock
+                                                                    )
+                                                                }
+                                                                className="flex justify-between !opacity-100 !pointer-events-auto"
+                                                            >
+                                                                <span className="ml-2 text-foreground">
+                                                                    {stock.name}
+                                                                </span>
+                                                                <span className="font-regular text-muted-foreground">
+                                                                    {
+                                                                        stock.symbol
+                                                                    }
+                                                                </span>
+                                                            </CommandItem>
+                                                        )
                                                     )}
-                                                    {!isSearching && (
+                                                </CommandGroup>
+                                                {isSearching && (
+                                                    <div className="flex items-center justify-center py-6">
+                                                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                                    </div>
+                                                )}
+                                                {!isSearching &&
+                                                    searchResults.length ===
+                                                        0 && (
                                                         <CommandEmpty>
                                                             {searchQuery.length <
                                                             2
@@ -225,42 +223,7 @@ export const AddHoldingForm = ({
                                                                 : "No stocks found"}
                                                         </CommandEmpty>
                                                     )}
-                                                    <CommandGroup heading="Results">
-                                                        {searchResults.map(
-                                                            (stock) => (
-                                                                <CommandItem
-                                                                    key={
-                                                                        stock.symbol
-                                                                    }
-                                                                    value={
-                                                                        searchType ===
-                                                                        "symbol"
-                                                                            ? stock.symbol
-                                                                            : stock.name
-                                                                    }
-                                                                    onSelect={() =>
-                                                                        handleSelectStock(
-                                                                            stock
-                                                                        )
-                                                                    }
-                                                                    className="flex justify-between !opacity-100 !pointer-events-auto"
-                                                                >
-                                                                    <span className="ml-2 text-foreground">
-                                                                        {
-                                                                            stock.name
-                                                                        }
-                                                                    </span>
-                                                                    <span className="font-regular text-muted-foreground">
-                                                                        {
-                                                                            stock.symbol
-                                                                        }
-                                                                    </span>
-                                                                </CommandItem>
-                                                            )
-                                                        )}
-                                                    </CommandGroup>
-                                                </CommandList>
-                                            </Tabs>
+                                            </CommandList>
                                         </Command>
                                     </PopoverContent>
                                 </Popover>
@@ -269,19 +232,45 @@ export const AddHoldingForm = ({
                         )}
                     />
 
+                    {/* Shares */}
                     <FormField
                         control={form.control}
                         name="shares"
                         render={({ field }) => (
-                            <FormItem className="w-40">
-                                <FormLabel>Number of Shares</FormLabel>
+                            <FormItem className="col-span-1">
+                                <FormLabel>Shares</FormLabel>
                                 <FormControl>
                                     <Input
-                                        type="number"
+                                        type="text"
                                         placeholder="0"
-                                        step="0.01"
-                                        min="0.01"
+                                        min="0"
                                         {...field}
+                                        value={
+                                            field.value === 0 ? "" : field.value
+                                        }
+                                        onChange={(e) => {
+                                            const inputValue = e.target.value
+                                            if (
+                                                inputValue === "" ||
+                                                /^[0-9]*\.?[0-9]*$/.test(
+                                                    inputValue
+                                                )
+                                            ) {
+                                                field.onChange(inputValue)
+                                            }
+                                        }}
+                                        onBlur={() => {
+                                            if (
+                                                field.value !== 0 &&
+                                                !isNaN(Number(field.value))
+                                            ) {
+                                                field.onChange(
+                                                    parseFloat(
+                                                        String(field.value)
+                                                    )
+                                                )
+                                            }
+                                        }}
                                         disabled={formSubmitting || isLoading}
                                     />
                                 </FormControl>
@@ -290,11 +279,12 @@ export const AddHoldingForm = ({
                         )}
                     />
 
+                    {/* Purchase Price */}
                     <FormField
                         control={form.control}
                         name="purchasePrice"
                         render={({ field }) => (
-                            <FormItem className="w-40">
+                            <FormItem className="col-span-1">
                                 <FormLabel>Purchase Price (€)</FormLabel>
                                 <FormControl>
                                     <Input
@@ -303,6 +293,14 @@ export const AddHoldingForm = ({
                                         step="0.01"
                                         min="0.01"
                                         {...field}
+                                        value={field.value || ""}
+                                        onChange={(e) => {
+                                            const value =
+                                                e.target.value === ""
+                                                    ? 0
+                                                    : parseFloat(e.target.value)
+                                            field.onChange(value)
+                                        }}
                                         disabled={formSubmitting || isLoading}
                                     />
                                 </FormControl>
@@ -311,41 +309,18 @@ export const AddHoldingForm = ({
                         )}
                     />
 
+                    {/* Purchase Date */}
                     <FormField
                         control={form.control}
                         name="purchaseDate"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="col-span-1">
                                 <FormLabel>Date</FormLabel>
                                 <FormControl>
                                     <Input
                                         type="date"
                                         {...field}
                                         disabled={formSubmitting || isLoading}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Company Name</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Company name"
-                                        {...field}
-                                        disabled={
-                                            !!selectedStock ||
-                                            formSubmitting ||
-                                            isLoading
-                                        }
                                     />
                                 </FormControl>
                                 <FormMessage />

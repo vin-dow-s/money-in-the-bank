@@ -1,5 +1,5 @@
-import { Footer } from "@/components/dashboard/footer"
-import { Header } from "@/components/dashboard/header"
+import { Footer } from "@/components/footer"
+import { Header } from "@/components/header"
 import { mainFont } from "@/lib/fonts"
 import type { Metadata } from "next"
 import "./globals.css"

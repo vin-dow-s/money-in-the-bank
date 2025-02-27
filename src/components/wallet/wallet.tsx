@@ -27,9 +27,6 @@ export const Wallet = () => {
         holdings,
         isLoading,
         error,
-        totalValue,
-        totalGain,
-        totalGainPercent,
         removeHolding,
         refreshPrices,
         lastRefreshed,
@@ -46,11 +43,19 @@ export const Wallet = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <CardTitle>My Wallet</CardTitle>
-                        <CardDescription>
-                            Manage your stocks and ETFs portfolio
-                        </CardDescription>
+                        <CardDescription>Your stocks and ETFs</CardDescription>
                     </div>
                     <div className="flex space-x-2">
+                        {lastRefreshed && (
+                            <div className="flex items-center text-xs text-muted-foreground m-2 justify-center">
+                                <Clock className="h-3 w-3 mr-1" />
+                                Last updated:{" "}
+                                {formatDistanceToNow(
+                                    new Date(lastRefreshed)
+                                )}{" "}
+                                ago
+                            </div>
+                        )}
                         <Button
                             variant="outline"
                             onClick={handleRefresh}
@@ -74,13 +79,6 @@ export const Wallet = () => {
                         </Button>
                     </div>
                 </div>
-                {lastRefreshed && (
-                    <div className="flex items-center text-xs text-muted-foreground mt-2">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Last updated:{" "}
-                        {formatDistanceToNow(new Date(lastRefreshed))} ago
-                    </div>
-                )}
             </CardHeader>
             <CardContent>
                 {error && (
@@ -88,66 +86,6 @@ export const Wallet = () => {
                         {error}
                     </div>
                 )}
-
-                <div className="grid gap-4 md:grid-cols-3 mb-6">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Value
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {totalValue.toFixed(2)}
-                                <span className="text-sm">€</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Gain/Loss
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div
-                                className={cn(
-                                    "text-2xl font-bold",
-                                    totalGain >= 0
-                                        ? "text-green-500"
-                                        : "text-red-500"
-                                )}
-                            >
-                                {totalGain.toFixed(2)}
-                                <span className="text-sm">€</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Return
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div
-                                className={cn(
-                                    "text-2xl font-bold flex items-center",
-                                    totalGainPercent >= 0
-                                        ? "text-green-500"
-                                        : "text-red-500"
-                                )}
-                            >
-                                {totalGainPercent >= 0 ? (
-                                    <ArrowUp className="mr-1 h-5 w-5" />
-                                ) : (
-                                    <ArrowDown className="mr-1 h-5 w-5" />
-                                )}
-                                {Math.abs(totalGainPercent).toFixed(2)}%
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
 
                 {isAddingHolding && (
                     <div className="mb-6 p-4 border rounded-sm">
@@ -168,14 +106,14 @@ export const Wallet = () => {
                     </div>
                 ) : (
                     <div className="rounded-sm border">
-                        <div className="grid grid-cols-12 border-b bg-muted/50 p-3 text-sm font-medium">
-                            <div className="col-span-2">Symbol</div>
-                            <div className="col-span-4">Name</div>
+                        <div className="grid grid-cols-10 border-b bg-muted/50 p-3 text-sm font-medium">
+                            <div className="col-span-1">Symbol</div>
+                            <div className="col-span-3">Name</div>
+                            <div className="col-span-1 text-right">
+                                Current /1
+                            </div>
                             <div className="col-span-1 text-right">Shares</div>
                             <div className="col-span-1 text-right">Spent</div>
-                            <div className="col-span-1 text-right">
-                                Current (1)
-                            </div>
                             <div className="col-span-1 text-right">Value</div>
                             <div className="col-span-1 text-right">Gain %</div>
                             <div className="col-span-1 text-right">Actions</div>
@@ -184,13 +122,18 @@ export const Wallet = () => {
                             {holdings.map((holding: WalletHolding) => (
                                 <div
                                     key={holding.id}
-                                    className="grid grid-cols-12 items-center p-3 text-sm"
+                                    className="grid grid-cols-10 items-center p-3 text-sm"
                                 >
-                                    <div className="col-span-2 text-muted-foreground">
+                                    <div className="col-span-1 text-muted-foreground">
                                         {holding.symbol}
                                     </div>
-                                    <div className="col-span-4 ">
+                                    <div className="col-span-3">
                                         {holding.name}
+                                    </div>
+                                    <div className="col-span-1 text-right">
+                                        {holding.currentPrice?.toFixed(2) ||
+                                            "-"}
+                                        €
                                     </div>
                                     <div className="col-span-1 text-right">
                                         {holding.shares}
@@ -198,11 +141,7 @@ export const Wallet = () => {
                                     <div className="col-span-1 text-right">
                                         {holding.purchasePrice.toFixed(2)}€
                                     </div>
-                                    <div className="col-span-1 text-right">
-                                        {holding.currentPrice?.toFixed(2) ||
-                                            "-"}
-                                        €
-                                    </div>
+
                                     <div className="col-span-1 text-right font-medium">
                                         {holding.currentValue?.toFixed(2) ||
                                             "-"}
